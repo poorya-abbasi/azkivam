@@ -1,5 +1,6 @@
 import { getTimestamp } from "./shared";
 import CryptoJS from "crypto-js";
+import TargetNotFoundError from "./errors/TargetNotFoundError";
 
 class Azkivam {
   private merchand_id: string;
@@ -29,8 +30,59 @@ class Azkivam {
     }).toString();
     return signature;
   };
+
+  generateCreateBody(payload: CreateDTO) {
+    if (payload.fallback_uri) this.fallback_uri = payload.fallback_uri;
+    if (payload.redirect_uri) this.redirect_uri = payload.redirect_uri;
+    if (!this.fallback_uri || !this.redirect_uri)
+      throw new TargetNotFoundError();
+
+    const requestBody = {
+      fallback_uri: this.fallback_uri,
+      redirect_uri: this.redirect_uri,
+      merchand_id: this.merchand_id,
+      amount: payload.amount,
+      mobile_number: payload.mobile_number,
+      items: payload.items,
+      provider_id: 0,
+    };
+
+    if (payload.provider_id) {
+      requestBody.provider_id = payload.provider_id;
+    } else {
+      const generatedProviderId = Math.floor(
+        Math.floor(100000 + Math.random() * 900000)
+      );
+      requestBody.provider_id = generatedProviderId;
+    }
+    return requestBody;
+  }
 }
 
+//Types
 type RequestMethod = "GET" | "POST" | "PUT" | "DELETE";
+
+type Items = {
+  name: string;
+  count: number;
+  amount: number;
+  url: string;
+};
+
+type CreateDTO = {
+  amount: number;
+  mobile_number: string;
+  items: Array<Items>;
+  provider_id?: number;
+  redirect_uri?: string;
+  fallback_uri?: string;
+};
+
+type CreateResponse = {
+  provider_id: number;
+  rsCode: number;
+  payment_uri: string;
+  ticket_id: string;
+};
 
 export default Azkivam;
