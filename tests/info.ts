@@ -1,4 +1,4 @@
 export default {
-  api_key: "cdba66e9df71233fc1b88a077d75f3c94b626961a412bf7a1e4a87a0495b601d",
-  merchant_id: "2",
+  api_key: "52a6620ceb80c045e465f91a4f789cd566662caecd811601740ba94902ac504d",
+  merchant_id: "37218",
 };

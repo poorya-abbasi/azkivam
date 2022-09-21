@@ -1,6 +1,8 @@
 import Azkivam from "../src/index";
 import TestInfo from "./info";
 
+jest.setTimeout(15000);
+
 describe("Ticket Creation", () => {
   const api_key = TestInfo.api_key;
   const merchant_id = TestInfo.merchant_id;
@@ -35,9 +37,9 @@ describe("Ticket Creation", () => {
 
   test("The ticket creation payload must be generated and must be valid", () => {
     const azkivam = new Azkivam(merchant_id, api_key, "REDIRECT", "FALLBACK");
-    const amount = 999;
-    const mobile_number = "0000";
-    const provider_id = 333;
+    const amount = 600000;
+    const mobile_number = "09129990000";
+    const provider_id = 123456;
     const items = [
       {
         name: "ProductOne",
@@ -65,8 +67,8 @@ describe("Ticket Creation", () => {
   test("The provider id must be generated if not provided", () => {
     const azkivam = new Azkivam(merchant_id, api_key, "REDIRECT", "FALLBACK");
     const body = azkivam.generateCreateBody({
-      amount: 999,
-      mobile_number: "0000",
+      amount: 600000,
+      mobile_number: "09129990000",
       items: [
         {
           name: "ProductOne",
@@ -83,8 +85,9 @@ describe("Ticket Creation", () => {
     const azkivam = new Azkivam(merchant_id, api_key, "REDIRECT", "FALLBACK");
     const response = await azkivam
       .createTicket({
-        amount: 999,
-        mobile_number: "0000",
+        amount: 600000,
+        mobile_number: "09129990000",
+        provider_id: 123456,
         items: [
           {
             name: "ProductOne",
@@ -94,7 +97,12 @@ describe("Ticket Creation", () => {
           },
         ],
       })
-      .catch((err) => err.code);
-    expect(response).toBe(502);
+      .catch((err) => {
+        throw new Error(err.message);
+      });
+    expect(response.rsCode).toBeDefined();
+    expect(response.provider_id).toBeDefined();
+    expect(response.payment_uri).toBeDefined();
+    expect(response.ticket_id).toBeDefined();
   });
 });

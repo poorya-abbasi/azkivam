@@ -25,20 +25,26 @@ class Azkivam {
     if (fallback_uri) this.fallback_uri = fallback_uri;
     this.instance = axios.create({
       baseURL: this.endpoint,
-      headers: {
-        MerchantId: this.merchant_id,
-      },
     });
+    this.instance.defaults.headers.common.MerchantId = this.merchant_id;
   }
 
   generateSignature = (subUrl: string, requestMethod: RequestMethod) => {
     const api_key = this.api_key;
     const timestamp = getTimestamp();
-    const plainSignature = `${subUrl}#${timestamp}#${requestMethod}#${api_key}`;
-    const signature = CryptoJS.AES.encrypt(plainSignature, api_key, {
-      mode: CryptoJS.mode.CFB,
-      padding: CryptoJS.pad.Pkcs7,
-    }).toString();
+    const plainSignature = `${subUrl}##${requestMethod}#${api_key}`;
+    const generatedSignature = CryptoJS.AES.encrypt(
+      plainSignature,
+      CryptoJS.enc.Hex.parse(api_key),
+      {
+        iv: CryptoJS.enc.Hex.parse("00000000000000000000000000000000"),
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+      }
+    ).toString();
+    const signature = CryptoJS.enc.Hex.stringify(
+      CryptoJS.enc.Base64.parse(generatedSignature.toString())
+    );
     this.instance.defaults.headers.common.Signature = signature;
     return signature;
   };
@@ -72,17 +78,19 @@ class Azkivam {
     const subURL = "/payment/purchase";
     this.generateSignature(subURL, "POST");
     const body = this.generateCreateBody(payload);
+    console.log(this.instance.defaults.headers.common);
     const data = await this.instance
       .post(subURL, body)
       .then((res) => res.data)
       .catch((err) => {
+        console.log(err.response.data);
         throw new RequestError(err.response.status);
       });
     return {
       rsCode: data.rsCode,
       provider_id: body.provider_id,
-      payment_uri: data.payment_uri,
-      ticket_id: data.ticket_id,
+      payment_uri: data.result.payment_uri,
+      ticket_id: data.result.ticket_id,
     };
   };
 

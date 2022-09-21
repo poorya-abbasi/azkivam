@@ -11,13 +11,22 @@ describe("Authentication And Signature Generation", () => {
     const subUrl = "/payment/create";
     const requestMethod = "POST";
     const timestamp = getTimestamp();
-    const expectedPlainSignature = `${subUrl}#${timestamp}#${requestMethod}#${api_key}`;
+    const expectedPlainSignature = `${subUrl}##${requestMethod}#${api_key}`;
     const azkivam = new Azkivam(merchand_id, api_key);
-    const signature = azkivam.generateSignature(subUrl, requestMethod);
-    const decrypted = CryptoJS.AES.decrypt(signature, api_key, {
-      mode: CryptoJS.mode.CFB,
-      padding: CryptoJS.pad.Pkcs7,
-    }).toString(CryptoJS.enc.Utf8);
+
+    const generatedSignature = azkivam.generateSignature(subUrl, requestMethod);
+    const signature = CryptoJS.enc.Base64.stringify(
+      CryptoJS.enc.Hex.parse(generatedSignature)
+    );
+    const decrypted = CryptoJS.AES.decrypt(
+      signature,
+      CryptoJS.enc.Hex.parse(api_key),
+      {
+        iv: CryptoJS.enc.Hex.parse("00000000000000000000000000000000"),
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+      }
+    ).toString(CryptoJS.enc.Utf8);
     expect(decrypted).toBe(expectedPlainSignature);
   });
 });
