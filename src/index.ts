@@ -1,4 +1,4 @@
-import { generateProviderId, getTimestamp } from "./shared";
+import { generateProviderId } from "./shared";
 import CryptoJS from "crypto-js";
 import TargetNotFoundError from "./errors/TargetNotFoundError";
 import axios, { AxiosInstance } from "axios";
@@ -31,7 +31,6 @@ class Azkivam {
 
   generateSignature = (subUrl: string, requestMethod: RequestMethod) => {
     const api_key = this.api_key;
-    const timestamp = getTimestamp();
     const plainSignature = `${subUrl}##${requestMethod}#${api_key}`;
     const generatedSignature = CryptoJS.AES.encrypt(
       plainSignature,
