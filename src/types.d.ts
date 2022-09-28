@@ -1,3 +1,5 @@
+declare module "azkivam";
+
 type RequestMethod = "GET" | "POST" | "PUT" | "DELETE";
 
 type Items = {
