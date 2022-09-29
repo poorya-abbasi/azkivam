@@ -1,6 +1,6 @@
 {
   "name": "azkivam",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A helper library to implement AzkiVam finance payments fluidly",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
