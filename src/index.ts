@@ -1,8 +1,33 @@
 import CryptoJS from "crypto-js";
-import TargetNotFoundError from "./errors/TargetNotFoundError";
 import axios, { AxiosInstance } from "axios";
-import RequestError from "./errors/RequestError";
-import UnverifiableError from "./errors/UnverifiableError";
+
+class RequestError {
+  constructor(status: number) {
+    return {
+      code: status,
+      message: "Request failed with status " + status,
+    } as AzkivamError;
+  }
+}
+
+class TargetNotFoundError {
+  constructor() {
+    return {
+      code: 1,
+      message:
+        "RedirectURI and FallbackURI needs to be specified at least once",
+    } as AzkivamError;
+  }
+}
+
+class UnverifiableError {
+  constructor() {
+    return {
+      code: 28,
+      message: "Ticket status is not valid for verifying.",
+    } as AzkivamError;
+  }
+}
 
 class Azkivam {
   private endpoint = "https://api.azkiloan.com";
