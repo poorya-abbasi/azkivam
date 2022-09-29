@@ -1,4 +1,3 @@
-import { generateProviderId } from "./shared";
 import CryptoJS from "crypto-js";
 import TargetNotFoundError from "./errors/TargetNotFoundError";
 import axios, { AxiosInstance } from "axios";
@@ -28,6 +27,9 @@ class Azkivam {
     });
     this.instance.defaults.headers.common.MerchantId = this.merchant_id;
   }
+
+  generateProviderId = () =>
+    Math.floor(Math.floor(100000 + Math.random() * 900000));
 
   generateSignature = (subUrl: string, requestMethod: RequestMethod) => {
     const api_key = this.api_key;
@@ -67,7 +69,7 @@ class Azkivam {
     if (payload.provider_id) {
       requestBody.provider_id = payload.provider_id;
     } else {
-      const generatedProviderId = generateProviderId();
+      const generatedProviderId = this.generateProviderId();
       requestBody.provider_id = generatedProviderId;
     }
     return requestBody;
@@ -117,7 +119,7 @@ class Azkivam {
     const data = await this.instance
       .post(subURL, {
         ticket_id,
-        provider_id: provider_id || generateProviderId(),
+        provider_id: provider_id || this.generateProviderId(),
       })
       .then((res) => res.data)
       .catch((err) => {
